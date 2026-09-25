@@ -19,8 +19,8 @@ Direktlink auf eine Route: `…/Wettkampf_Videos/#U13_Quali1`
 
 **Wichtig:** Hochkant gefilmte Handyvideos müssen „fest gedreht“ sein, sonst zeigt Safari
 nur ein schwarzes Bild (Ton läuft). Mit ffmpeg:
-`ffmpeg -i in.mp4 -c:v libx264 -crf 18 -preset slow -pix_fmt yuv420p -c:a copy -movflags +faststart out.mp4`
-(ffmpeg dreht dabei automatisch richtig herum.)
+`ffmpeg -i in.mp4 -an -c:v libx264 -crf 21 -preset slow -pix_fmt yuv420p -movflags +faststart out.mp4`
+(ffmpeg dreht dabei automatisch richtig herum; `-an` entfernt den Ton – die Seite zeigt die Videos ohne Ton.)
 
 
 ## GitHub Pages aktivieren (einmalig)
