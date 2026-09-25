@@ -22,7 +22,7 @@ window.VIDEOS = [
   { klasse: "U9",  quali: 3, modus: "Toprope",  src: "videos/U9_Quali3.mp4", notiz: "" },
 
   { klasse: "U11", quali: 1, modus: "Toprope",  src: "videos/U11_Quali1.mp4", notiz: "" },
-  { klasse: "U11", quali: 2, modus: "Toprope",  src: "", notiz: "" },
+  { klasse: "U11", quali: 2, modus: "Toprope",  src: "videos/U11_Quali2.mp4", notiz: "" },
 
   { klasse: "U13", quali: 1, modus: "Toprope",  src: "videos/U13_Quali1.mp4", notiz: "" },
   { klasse: "U13", quali: 2, modus: "Toprope",  src: "videos/U13_Quali2.mp4", notiz: "" },
