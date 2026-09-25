@@ -89,6 +89,9 @@ section.cls{margin:28px 0 8px}
   .card-body b{font-size:15px}
   .tag{font-size:11px;padding:2px 7px}
   .thumb .play{width:40px;height:40px}
+  .card.missing .thumb::after{margin-top:26px;font-size:13px}
+  .chips{gap:6px}
+  .chip{padding:7px 13px}
 }
 footer{color:var(--muted);font-size:13px;padding:36px 0 48px}
 
@@ -173,6 +176,7 @@ dialog::backdrop{background:#000}
 <script>
 (function(){
   var WK = window.WETTKAMPF || {}, V = (window.VIDEOS || []).slice();
+  V.forEach(function(v){ v.key = v.klasse + "_Quali" + v.quali; v.name = "Quali " + v.quali; });
   var $ = function(id){ return document.getElementById(id); };
   var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
@@ -215,7 +219,7 @@ dialog::backdrop{background:#000}
       if (active !== "alle" && active !== k) return;
       var items = V.filter(function(v){ return v.klasse === k; });
       html += '<section class="cls" style="--c:' + color(k) + '"><div class="cls-head"><h2>' + esc(k) +
-        '</h2><span class="meta">' + items.length + (items.length === 1 ? " Route" : " Routen") +
+        '</h2><span class="meta">' + items.length + (items.length === 1 ? " Qualiroute" : " Qualirouten") +
         (items[0] && items[0].modus ? " · " + esc(items[0].modus) : "") + '</span></div><div class="grid">';
       items.forEach(function(v){
         var i = V.indexOf(v), has = !!v.src, id = yt(v.src);
@@ -223,12 +227,12 @@ dialog::backdrop{background:#000}
           ? '<img alt="" src="https://i.ytimg.com/vi/' + esc(id) + '/hqdefault.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
           : '<video muted playsinline preload="metadata" src="' + esc(v.src) + '#t=2" data-i="' + i + '"></video>';
         html += '<button class="card' + (has ? "" : " missing") + '" data-i="' + i + '"' + (has ? "" : " disabled") +
-          ' aria-label="Route ' + esc(v.route) + ', ' + esc(v.klasse) + ' ' + esc(v.gruppe) + '">' +
-          '<div class="thumb">' + media + '<span class="rt">' + esc(v.route) + '</span>' +
+          ' aria-label="' + esc(v.klasse) + ' ' + esc(v.name) + '">' +
+          '<div class="thumb">' + media + '<span class="rt">Q' + esc(v.quali) + '</span>' +
           '<span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>' +
           '<span class="dur" hidden></span></div>' +
-          '<div class="card-body"><b>Route ' + esc(v.route) + '</b><div class="tags">' +
-          '<span class="tag">' + esc(v.klasse) + ' ' + esc(v.gruppe) + '</span>' +
+          '<div class="card-body"><b>' + esc(v.name) + '</b><div class="tags">' +
+          '<span class="tag">' + esc(v.klasse) + '</span>' +
           (v.modus ? '<span class="tag">' + esc(v.modus) + '</span>' : "") + '</div>' +
           (v.notiz ? '<p class="note">' + esc(v.notiz) + '</p>' : "") + '</div></button>';
       });
@@ -240,9 +244,7 @@ dialog::backdrop{background:#000}
         var d = el.parentNode.querySelector(".dur");
         if (isFinite(el.duration)) { d.textContent = fmt(el.duration); d.hidden = false; }
       });
-      el.addEventListener("error", function(){
-        var c = el.closest(".card"); c.classList.add("missing"); c.disabled = true; el.remove();
-      });
+      el.addEventListener("error", function(){ el.remove(); });
     });
   }
   $("list").addEventListener("click", function(e){
@@ -256,8 +258,8 @@ dialog::backdrop{background:#000}
   function open(i){
     var v = V[i]; if (!v) return;
     cur = i;
-    $("plT").textContent = "Route " + v.route;
-    $("plS").textContent = [v.klasse + " " + v.gruppe, v.modus].filter(Boolean).join(" · ");
+    $("plT").textContent = v.klasse + " · " + v.name;
+    $("plS").textContent = v.modus || "";
     $("plN").textContent = v.notiz || "";
     var id = yt(v.src), st = $("stage");
     if (id) {
@@ -269,14 +271,15 @@ dialog::backdrop{background:#000}
       el.playbackRate = rate;
       el.addEventListener("loadedmetadata", function(){ el.playbackRate = rate; });
       el.addEventListener("error", function(){
-        st.innerHTML = '<div class="err">Dieses Video ist noch nicht verfügbar.</div>';
+        st.innerHTML = '<div class="err">Das Video lässt sich in diesem Browser nicht abspielen.<br>' +
+          '<a style="color:#fff" href="' + esc(v.src) + '">Video direkt öffnen</a></div>';
       });
     }
     $("tools").style.display = id ? "none" : "";
     var p = playable(), k = p.indexOf(i);
     $("prev").disabled = k <= 0; $("next").disabled = k < 0 || k >= p.length - 1;
     if (!dlg.open) dlg.showModal();
-    if (location.hash !== "#" + v.route) history.replaceState(null, "", "#" + v.route);
+    if (location.hash !== "#" + v.key) history.replaceState(null, "", "#" + v.key);
   }
   function step(d){ var p = playable(), k = p.indexOf(cur) + d; if (k >= 0 && k < p.length) open(p[k]); }
   function vid(){ return $("stage").querySelector("video"); }
@@ -306,7 +309,7 @@ dialog::backdrop{background:#000}
 
   /* Direktlink, z. B. …/#Q7 */
   var h = decodeURIComponent(location.hash.slice(1)).toUpperCase();
-  if (h) V.forEach(function(v, i){ if (v.route.toUpperCase() === h && v.src) open(i); });
+  if (h) V.forEach(function(v, i){ if (v.key.toUpperCase() === h && v.src) open(i); });
 })();
 </script>
 </body>

@@ -6,13 +6,13 @@ Blättern zur nächsten Route. Optimiert fürs Handy.
 
 **Adresse (nach Aktivierung von GitHub Pages):**
 https://noelsimon.github.io/Wettkampf_Videos/
-Direktlink auf eine Route: `…/Wettkampf_Videos/#Q7`
+Direktlink auf eine Route: `…/Wettkampf_Videos/#U13_Quali1`
 
 ## Videos einfügen
 
-1. Videos in den Ordner `videos/` legen, benannt nach Route: `Q3.mp4` … `Q11.mp4`
+1. Videos in den Ordner `videos/` legen, benannt nach Klasse und Route: `U9_Quali1.mp4`, `U11_Quali2.mp4` …
    (MP4/H.264, max. 100 MB pro Datei).
-2. In `videos.js` prüfen, ob Routennummer, Klasse, Gruppe und Modus stimmen.
+2. In `videos.js` beim passenden Eintrag `src` ausfüllen, z. B. `"videos/U9_Quali1.mp4"`.
    Statt einer Datei geht auch ein Link (direkte .mp4-URL oder YouTube, gern „nicht gelistet“).
 3. Routen ohne Video zeigen automatisch „Video folgt“.
 
