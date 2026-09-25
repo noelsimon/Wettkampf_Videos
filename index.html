@@ -66,15 +66,13 @@ section.cls{margin:28px 0 8px}
   transition:transform .15s ease, border-color .15s ease}
 .card:hover{transform:translateY(-2px);border-color:var(--line-strong)}
 .card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
-.thumb{position:relative;aspect-ratio:16/9;background:var(--sunken);display:grid;place-items:center;overflow:hidden}
-.thumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.thumb{position:relative;aspect-ratio:4/5;background:var(--sunken);display:grid;place-items:center;overflow:hidden}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .thumb .play{position:relative;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.55);
   display:grid;place-items:center}
 .thumb .play svg{width:22px;height:22px;margin-left:3px;fill:#fff}
 .thumb .rt{position:absolute;left:10px;top:10px;background:var(--c);color:#fff;font:600 15px/1 var(--mono);
   padding:6px 9px;border-radius:8px}
-.thumb .dur{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.65);color:#fff;
-  font:500 12px/1 var(--mono);padding:4px 6px;border-radius:6px}
 .card.missing .play{display:none}
 .card.missing .thumb::after{content:"Video folgt";position:relative;color:var(--muted);font-weight:500}
 .card-body{padding:12px 14px 14px}
@@ -110,8 +108,8 @@ dialog::backdrop{background:#000}
 .ibtn:hover{background:rgba(255,255,255,.18)}
 .ibtn:disabled{opacity:.3;cursor:default}
 .ibtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.pl-stage{flex:1;min-height:0;display:grid;place-items:center;background:#000}
-.pl-stage video,.pl-stage iframe{width:100%;height:100%;border:0;object-fit:contain;background:#000}
+.pl-stage{position:relative;flex:1;min-height:0;display:grid;place-items:center;background:#000}
+.pl-stage video,.pl-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
 .pl-stage .err{padding:24px;text-align:center;opacity:.8}
 .pl-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;
   padding-bottom:max(10px,env(safe-area-inset-bottom));background:#0B0F14}
@@ -192,7 +190,13 @@ dialog::backdrop{background:#000}
     var m = /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/.exec(src || "");
     return m ? m[1] : null;
   }
-  var fmt = function(s){ s = Math.round(s); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+  /* Vorschaubild: posters/<Name>.jpg zu videos/<Name>.mp4, bei YouTube das YouTube-Bild */
+  function poster(v){
+    if (!v.src) return "";
+    var id = yt(v.src);
+    if (id) return "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
+    return v.bild || v.src.replace(/^videos\//, "posters/").replace(/\.[^.\/]+$/, ".jpg");
+  }
 
   /* ---------- Filter ---------- */
   var active = "alle";
@@ -222,15 +226,13 @@ dialog::backdrop{background:#000}
         '</h2><span class="meta">' + items.length + (items.length === 1 ? " Qualiroute" : " Qualirouten") +
         (items[0] && items[0].modus ? " · " + esc(items[0].modus) : "") + '</span></div><div class="grid">';
       items.forEach(function(v){
-        var i = V.indexOf(v), has = !!v.src, id = yt(v.src);
-        var media = !has ? "" : id
-          ? '<img alt="" src="https://i.ytimg.com/vi/' + esc(id) + '/hqdefault.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
-          : '<video muted playsinline preload="metadata" src="' + esc(v.src) + '#t=2" data-i="' + i + '"></video>';
+        var i = V.indexOf(v), has = !!v.src;
+        var pic = poster(v), media = pic ? '<img alt="" loading="lazy" src="' + esc(pic) + '">' : "";
         html += '<button class="card' + (has ? "" : " missing") + '" data-i="' + i + '"' + (has ? "" : " disabled") +
           ' aria-label="' + esc(v.klasse) + ' ' + esc(v.name) + '">' +
           '<div class="thumb">' + media + '<span class="rt">Q' + esc(v.quali) + '</span>' +
           '<span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>' +
-          '<span class="dur" hidden></span></div>' +
+          '</div>' +
           '<div class="card-body"><b>' + esc(v.name) + '</b><div class="tags">' +
           '<span class="tag">' + esc(v.klasse) + '</span>' +
           (v.modus ? '<span class="tag">' + esc(v.modus) + '</span>' : "") + '</div>' +
@@ -239,11 +241,7 @@ dialog::backdrop{background:#000}
       html += "</div></section>";
     });
     $("list").innerHTML = html;
-    $("list").querySelectorAll(".thumb video").forEach(function(el){
-      el.addEventListener("loadedmetadata", function(){
-        var d = el.parentNode.querySelector(".dur");
-        if (isFinite(el.duration)) { d.textContent = fmt(el.duration); d.hidden = false; }
-      });
+    $("list").querySelectorAll(".thumb img").forEach(function(el){
       el.addEventListener("error", function(){ el.remove(); });
     });
   }
@@ -266,7 +264,8 @@ dialog::backdrop{background:#000}
       st.innerHTML = '<iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen src="https://www.youtube-nocookie.com/embed/' +
         esc(id) + '?autoplay=1&rel=0&playsinline=1"></iframe>';
     } else {
-      st.innerHTML = '<video controls playsinline autoplay preload="auto" src="' + esc(v.src) + '"></video>';
+      st.innerHTML = '<video controls playsinline autoplay preload="auto"' + (poster(v) ? ' poster="' + esc(poster(v)) + '"' : "") +
+        ' src="' + esc(v.src) + '"></video>';
       var el = st.querySelector("video");
       el.playbackRate = rate;
       el.addEventListener("loadedmetadata", function(){ el.playbackRate = rate; });

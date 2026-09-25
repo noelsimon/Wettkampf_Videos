@@ -15,6 +15,13 @@ Direktlink auf eine Route: `…/Wettkampf_Videos/#U13_Quali1`
 2. In `videos.js` beim passenden Eintrag `src` ausfüllen, z. B. `"videos/U9_Quali1.mp4"`.
    Statt einer Datei geht auch ein Link (direkte .mp4-URL oder YouTube, gern „nicht gelistet“).
 3. Routen ohne Video zeigen automatisch „Video folgt“.
+4. Vorschaubild: `posters/<Name>.jpg` (gleicher Name wie das Video). Fehlt es, bleibt die Karte ohne Bild.
+
+**Wichtig:** Hochkant gefilmte Handyvideos müssen „fest gedreht“ sein, sonst zeigt Safari
+nur ein schwarzes Bild (Ton läuft). Mit ffmpeg:
+`ffmpeg -i in.mp4 -c:v libx264 -crf 18 -preset slow -pix_fmt yuv420p -c:a copy -movflags +faststart out.mp4`
+(ffmpeg dreht dabei automatisch richtig herum.)
+
 
 ## GitHub Pages aktivieren (einmalig)
 
