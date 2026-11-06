@@ -1,4 +1,4 @@
-# Videos der Qualirouten – Kidscup Zittau 26.09.2026
+# Videos der Qualirouten – Kidscup Heidenau 07.11.2026
 
 Übersichtsseite, auf der die Athlet*innen die Videos der Qualirouten anschauen können –
 sortiert nach Wertungsklasse, mit Zeitlupe (0.25× / 0.5×), ±5-s-Sprüngen und

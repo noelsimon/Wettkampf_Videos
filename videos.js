@@ -11,9 +11,9 @@
      notiz   optional: kurzer Hinweis für die Athlet*innen
    ===================================================================== */
 window.WETTKAMPF = {
-  titel: "4. Offener Sächsischer Kidscup",
-  ort:   "Kletterhalle Quacke Zittau",
-  datum: "Samstag, 26.09.2026",
+  titel: "5. Offener Sächsischer Kidscup",
+  ort:   "Kletterhalle YOYO, Heidenau",
+  datum: "Samstag, 07.11.2026",
 };
 
 window.VIDEOS = [
